@@ -66,10 +66,13 @@ var uuid = require('node-uuid'),
 
             if (json.schemes && json.schemes.indexOf('https') != -1) {
                 this.basePath = 'https://' + this.basePath;
+            } else if (json.schemes[0].startsWith('{{')) {
+              this.basePath = json.schemes[0] + '://' + this.basePath;
             }
-            else {
-                this.basePath = 'http://' + this.basePath;
-            }
+
+            // } else if (!this.basePath.startsWith('{{')) {
+            //     this.basePath = 'http://' + this.basePath;
+            // }
 
             if (!this.endsWith(this.basePath, '/')) {
                 this.basePath += '/';
@@ -207,6 +210,10 @@ var uuid = require('node-uuid'),
             tempBasePath = this.basePath
                 .replace(/{{/g, 'POSTMAN_VARIABLE_OPEN_DB')
                 .replace(/}}/g, 'POSTMAN_VARIABLE_CLOSE_DB');
+
+            request.url = decodeURI(url.resolve(tempBasePath, path))
+                .replace(/postman_variable_open_db/g, '{{')
+                .replace(/postman_variable_close_db/g, '}}');
 
             request.url = decodeURI(url.resolve(tempBasePath, path))
                 .replace(/POSTMAN_VARIABLE_OPEN_DB/g, '{{')
